@@ -1,5 +1,4 @@
-pandas
-matplotlib
-streamlit
-seaborn
-calendar
+matplotlib==3.10.0
+pandas==2.2.3
+seaborn==0.13.2
+streamlit==1.41.1
