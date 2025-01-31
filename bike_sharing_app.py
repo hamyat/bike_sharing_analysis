@@ -8,25 +8,20 @@ sns.set_style('darkgrid')
 data_path = 'bikeshare_hour_clean.csv'
 df = pd.read_csv(data_path)
 
+# Convert the 'dteday' column to datetime
+df['dteday'] = pd.to_datetime(df['dteday'])
+
 # Create Function
 
-# Bike Montthly Rentals
+# Bike Monthly Rentals
 def bike_monthly_rentals(df):
     monthly_rentals = df.groupby('mnth')['cnt'].sum()
-    fig, ax = plt.subplots()
-    monthly_rentals.plot(kind='bar', ax=ax)
-    ax.set_xlabel('Month')
-    ax.set_ylabel('Number of Rentals')
-    return fig
+    return monthly_rentals
 
 # Bike Daily Rentals
 def bike_daily_rentals(df):
-    daily_rentals = df.groupby('weekday')['cnt'].sum()
-    fig, ax = plt.subplots()
-    daily_rentals.plot(kind='bar', ax=ax)
-    ax.set_xlabel('Day of the Week')
-    ax.set_ylabel('Number of Rentals')
-    return fig
+    daily_rentals = df.groupby('dteday')[['cnt', 'casual', 'registered']].sum()
+    return daily_rentals
 
 # Bike Hourly Rentals
 def bike_hourly_rentals(df):
@@ -99,15 +94,6 @@ def bike_by_year(df):
     ax.set_ylabel('Number of Rentals')
     return fig
 
-# Bike by Week
-def bike_by_week(df):
-    week_rentals = df.groupby('week')['cnt'].sum()
-    fig, ax = plt.subplots()
-    week_rentals.plot(kind='bar', ax=ax)
-    ax.set_xlabel('Week')
-    ax.set_ylabel('Number of Rentals')
-    return fig
-
 # Filter the data
 min_date = df['dteday'].min()
 max_date = df['dteday'].max()
@@ -115,42 +101,50 @@ max_date = df['dteday'].max()
 # Create the Web App
 
 # Sidebar
-st.sidebar.title('Bike Sharing Dashboard')
-st.sidebar.subheader('Filters')
-start_date = st.sidebar.date_input('Start Date', min_date)
-end_date = st.sidebar.date_input('End Date', max_date)
+with st.sidebar:
+    # Menambahkan logo dari <a href="https://www.flaticon.com/free-icons/rental" title="rental icons">Rental icons created by surang - Flaticon</a>
+    st.title('Bike Sharing Dashboard')
+    st.image("https://github.com/hamyat/bike_sharing_analysis/blob/main/rent.png")
+    st.subheader('Filters')
+    # Mengambil start date dan end date dari user
+    start_date = st.date_input('Start Date', min_date)
+    end_date = st.date_input('End Date', max_date)
 
+    # start_date, end_date = st.date_input(
+    #     label='Rentang Waktu',min_value=min_date,
+    #     max_value=max_date,
+    #     value=[min_date, max_date]
+    # )
+
+main_df = df[(df['dteday'] >= str(start_date)) & (df['dteday'] <= str(end_date))]
+
+daily_rentals = bike_daily_rentals(main_df)
+monthly_rentals = bike_monthly_rentals(main_df)
+season_rentals = bike_by_season(main_df)
+weather_rentals = bike_by_weather(main_df)
+hourly_rentals = bike_hourly_rentals(main_df)
+
+# Dashboard
 # Set the title of the dashboard
 st.header('Bike Sharing Dashboard')
 st.subheader('Exploratory Data Analysis')
 
-# Display the dataframe
-st.subheader('Bike Sharing Data')
-st.write(df.head())
-
-# Plot the number of bike rentals per hour
-st.subheader('Number of Bike Rentals per Hour')
-hourly_rentals = df.groupby('hr')['cnt'].sum()
-fig, ax = plt.subplots()
-hourly_rentals.plot(kind='bar', ax=ax)
-ax.set_xlabel('Hour of the Day')
-ax.set_ylabel('Number of Rentals')
-st.pyplot(fig)
-
-# Plot the number of bike rentals per day of the week
-st.subheader('Number of Bike Rentals per Day of the Week')
-daily_rentals = df.groupby('weekday')['cnt'].sum()
-fig, ax = plt.subplots()
-daily_rentals.plot(kind='bar', ax=ax)
-ax.set_xlabel('Day of the Week')
-ax.set_ylabel('Number of Rentals')
-st.pyplot(fig)
-
-# Plot the number of bike rentals per month
-st.subheader('Number of Bike Rentals per Month')
-monthly_rentals = df.groupby('mnth')['cnt'].sum()
-fig, ax = plt.subplots()
-monthly_rentals.plot(kind='bar', ax=ax)
-ax.set_xlabel('Month')
-ax.set_ylabel('Number of Rentals')
-st.pyplot(fig)
+# Display interactive plots
+st.write('## Bike Rentals Over Time')
+st.line_chart(daily_rentals)
+st.write('## Monthly Bike Rentals')
+st.bar_chart(monthly_rentals)
+st.write('## Hourly Bike Rentals')
+st.pyplot(hourly_rentals)
+st.write('## Bike Rentals by Season')
+st.pyplot(season_rentals)
+st.write('## Bike Rentals by Weather Situation')
+st.pyplot(weather_rentals)
+st.write('## Bike Rentals by Temperature')
+st.pyplot(bike_by_temp(main_df))
+st.write('## Bike Rentals by Day of the Week')
+st.pyplot(bike_by_weekday(main_df))
+st.write('## Bike Rentals by Holiday')
+st.pyplot(bike_by_holiday(main_df))
+st.write('## Bike Rentals by Working Day')
+st.pyplot(bike_by_workingday(main_df))
