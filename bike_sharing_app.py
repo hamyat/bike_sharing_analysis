@@ -50,15 +50,6 @@ def bike_by_weather(df):
     ax.set_ylabel('Number of Rentals')
     return fig
 
-# Bike by Temperature
-def bike_by_temp(df):
-    fig, ax = plt.subplots()
-    temp_rentals = df.groupby('temp')['cnt'].sum()
-    temp_rentals.plot(kind='bar', ax=ax)
-    ax.set_xlabel('Temperature')
-    ax.set_ylabel('Number of Rentals')
-    return fig
-
 # Bike by Weekday
 def bike_by_weekday(df):
     weekday_rentals_count = df.groupby('weekday')['cnt'].sum()
@@ -141,8 +132,6 @@ st.pyplot(weather_rentals_count)
 st.pyplot(season_rentals)
 st.write('## Bike Rentals by Weather Situation')
 st.pyplot(weather_rentals)
-st.write('## Bike Rentals by Temperature')
-st.pyplot(bike_by_temp(main_df))
 st.write('## Bike Rentals by Day of the Week')
 st.pyplot(bike_by_weekday(main_df))
 st.write('## Bike Rentals by Holiday')
